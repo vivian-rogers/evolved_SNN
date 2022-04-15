@@ -6,7 +6,7 @@ module SNN
 struct Model
 	Rₚ::Float64
 	n::Int 
-	TMR₀::Float64
+	TMR₀::Float62
 	Pinhib::Float64
 	Vb::Float64
 	LayerSizes::Vector{Neuron} # Vector of sizes of each layer
@@ -27,13 +27,14 @@ function initNeurons()
 	#return vector of neurons
 end
 
-function ForwardProp(M::Model,stimulus,dt,nt,Q::Float64=1)
+function ForwardProp(M::Model,stimulus::Function,dt::Float64,maxt::Float64,Q::Float64=1)
 	net = Network(M,initNeurons())
 	AllSpikes = Any[]
 	OutSpikes = BitArray[]
-	Times = [t for t in 0:dt:(nt*dt)]
-	for input in stimulus
+	Times = [t for t in 0:dt:maxt]
+	for t in Times 
 		# update neurons
+		input = stimulus(t)
 		# Spikesᵢ (Vector of bitarrays) = updateNeurons(net.Neurons)
 		run(`clear`)
 		display(Spikesᵢ)
@@ -49,7 +50,7 @@ function ForwardProp(M::Model,stimulus,dt,nt,Q::Float64=1)
 	end
 	# decode OutSpikes to data 
 	# Output = Decode(dt,OutSpikes)
-	return OutSpikes
+	return Output
 end
 
 			

@@ -1,7 +1,8 @@
+push!(LOAD_PATH, "./")
 using LinearAlgebra
 using Random
 
-module SNN
+module Models
 
 struct Model
 	Rₚ::Float64
@@ -9,18 +10,19 @@ struct Model
 	TMR₀::Float64
 	Pinhib::Float64
 	Vb::Float64
-	LayerSizes::Vector{Neuron} # Vector of sizes of each layer
+	LayerSizes::Vector{Int} # Vector of sizes of each layer
 	W::Matrix{Matrix} # matrix of matrices of weights
 	Jₙ::Matrix{Matrix} # matrix of ones for each layer
 	G₀::Matrix{Matrix} # matrix of matrices of conductances
 	Boolmask::Matrix{Bool} # matrix of boolean masks
 	ConnectionList::Vector
+	iRes::Int # index of the reservoir in the W
 end
 
 
 function randWeights(m,n,nweights,Pinhibitory)
 	W = Matrix{Rational{Int}}(m,n)
-	for i in i = 1:m
+	for i = 1:m
 		if(rand() > Pinhibitory)
 			S = -1
 		else
@@ -61,35 +63,18 @@ function initModel(LayerSizes,nweights=1,Pinhib=0.05,Rₚ=1,TMR₀=2.00,Vb = 0.5
 		Jₙ[i,i-1] = ones(mᵢ,nᵢ) # initialize it to 0 for now
 		Boolmask[i,i-1] = 1
 	end
-	tempModel = Model(Rₚ, n, TMR₀, Pinhib, Vb, LayerSizes, W, Jₙ, G₀, Boolmask, ConnectionList)
+	tempModel = Model(Rₚ, n, TMR₀, Pinhib, Vb, LayerSizes, W, Jₙ, G₀, Boolmask, ConnectionList,0)
 	Ggen(tempModel)
 	return tempModel
-	
-
-	
-
-	
-
-function update_neuron(n::Neuron,dt::Float64) # updates neuron, sends out spike if saturated
-	if(n.integrated < n.threshold)
-		n.integrated -= dt*n.decay_rate
-		return 0
-	elseif
-		if(firinglock == true)
-			if(n.t_since_sat > n.sat_period) #
-				n.lock == true
-				n.
-			else
-				return n.output
-		else
-
-		end
-	end
 end
 
+function addLSM(M::Model,iRes::Int, W_res::Matrix)
+	M.iRes = iRes
+	M.W[iRes,iRes] = W_res
+	push!(M.ConnectionList,[iRes,iRes])
+	# Could train the reservoir, but don't
+	return true
+end	
 
-function +(n::Neuron, in::Float64)
-	if(n.firinglock == false)
-		integrated = max(in,in+integrated)
-	end
+
 end

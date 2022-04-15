@@ -4,6 +4,7 @@ using Random
 module SNN
 
 struct Model
+	name
 	Rₚ::Float64
 	n::Int 
 	TMR₀::Float64
@@ -21,13 +22,15 @@ end
 
 function Error(Output,Expected)
 	sum = 0
+	n_points = size(Output)[1]
 	for i in eachindex(Output)
 		sum += √(sum((Output[i] - Expected[i]).^2))
 	end
-	return sum
+	return sum/n_points
 end
 
-function mutate(M::Model,P::Float64 = 0.02,nweights)
+function mutate(M::Model,P::Float64 = 0.02)
+	M_new = deepcopy(M)
 	for i in 1:M.n
 		for j in 1:M.n
 			# Can this sub-matrix be modified?
@@ -44,4 +47,12 @@ function mutate(M::Model,P::Float64 = 0.02,nweights)
 					end
 					for jW = 1:mᵢ
 						W[nᵢ,mᵢ] = S
-								
+					
+
+					end
+				end
+			end
+		end
+	end
+	return M_new
+end
