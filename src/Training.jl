@@ -1,22 +1,12 @@
+push!(LOAD_PATH, "./")
+
+module Training
 using LinearAlgebra
 using Random
+using Models
 
-module SNN
 
-struct Model
-	name
-	Rₚ::Float64
-	n::Int 
-	TMR₀::Float64
-	Pinhib::Float64
-	Vb::Float64
-	LayerSizes::Vector{Neuron} # Vector of sizes of each layer
-	W::Matrix{Matrix} # matrix of matrices of weights
-	Jₙ::Matrix{Matrix} # matrix of ones for each layer
-	G₀::Matrix{Matrix} # matrix of matrices of conductances
-	Boolmask::Matrix{Bool} # matrix of boolean masks
-	Neurons::
-end
+export Error
 
 
 
@@ -24,7 +14,7 @@ function Error(Output,Expected)
 	sum = 0
 	n_points = size(Output)[1]
 	for i in eachindex(Output)
-		sum += √(sum((Output[i] - Expected[i]).^2))
+		sum += √( sum( (Output[i] - Expected[i]) .^ 2 ) )
 	end
 	return sum/n_points
 end
@@ -56,3 +46,8 @@ function mutate(M::Model,P::Float64 = 0.02)
 	end
 	return M_new
 end
+
+
+end
+
+

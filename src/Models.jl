@@ -1,7 +1,7 @@
 
 module Models
 
-export initModel, Ggen, addLSM
+export Model, initModel, Ggen, addLSM, printModel
 
 push!(LOAD_PATH, "./")
 using LinearAlgebra
@@ -28,10 +28,11 @@ end
 function printModel(M::Model)
 	println("===== Model structure ====")
 	println("Misc network parameters: Vb = $(M.Vb), Rₚ = $(M.Rₚ), TMR₀ = $(M.TMR₀*100)")
-	println("Layer structure: ")
+	println("Layer widths: ")
 	show(M.LayerSizes)
 	if(M.iRes > 0)
-		println("\n$(M.n) x $(M.n) reservoir on layer $(M.iRes)")
+		resSize = M.LayerSizes[M.iRes]
+		println("\n + $(resSize) x $(resSize) reservoir on layer $(M.iRes)")
 	end
 	print("\nWeight matrices:")
 	for C in M.ConnectionList
@@ -57,6 +58,12 @@ function randWeights(m,n,nweights,Pinhibitory)
 	return W
 end
 
+function Ggen(M::Model, ΔV_L::Vector{Float64}, ΔV_R::Vector{Float64})
+	for C in M.ConnectionList
+		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
+	end
+end
+
 function Ggen(M::Model)
 	for C in M.ConnectionList
 		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
@@ -79,7 +86,7 @@ function initModel(LayerSizes,nweights=1,Pinhib=0.05,Rₚ=1,TMR₀=2.00,Vb = 0.5
 	ConnectionList = []
 	# set up the forward prop
 	for i = 2:n
-		mᵢ = LayerSizes[i-1]; nᵢ = LayerSizes[i] 
+		mᵢ = LayerSizes[i]; nᵢ = LayerSizes[i-1] 
 		push!(ConnectionList,[i-1,i])
 		W[i,i-1] = randWeights(mᵢ,nᵢ,nweights,Pinhib)
 		G₀[i,i-1] = zeros(mᵢ,nᵢ) # initialize it to 0 for now
@@ -94,6 +101,7 @@ end
 function addLSM(M::Model,iRes::Int, W_res::Matrix)
 	M.iRes = iRes
 	M.W[iRes,iRes] = W_res
+	M.Jₙ[iRes,iRes] = ones(size(W_res)[1],size(W_res)[1])
 	push!(M.ConnectionList,[iRes,iRes])
 	# Could train the reservoir, but don't
 	return true
