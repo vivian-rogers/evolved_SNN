@@ -1,10 +1,15 @@
+
+module Models
+
+export initModel, Ggen, addLSM
+
 push!(LOAD_PATH, "./")
 using LinearAlgebra
 using Random
 
-module Models
 
-struct Model
+
+mutable struct Model
 	Rₚ::Float64
 	n::Int 
 	TMR₀::Float64
@@ -20,10 +25,27 @@ struct Model
 end
 
 
+function printModel(M::Model)
+	println("===== Model structure ====")
+	println("Misc network parameters: Vb = $(M.Vb), Rₚ = $(M.Rₚ), TMR₀ = $(M.TMR₀*100)")
+	println("Layer structure: ")
+	show(M.LayerSizes)
+	if(M.iRes > 0)
+		println("\n$(M.n) x $(M.n) reservoir on layer $(M.iRes)")
+	end
+	print("\nWeight matrices:")
+	for C in M.ConnectionList
+		print("\n\nLayer $(C[1]) to $(C[2]) connection:")
+		display(round.(M.W[C[2],C[1]]; sigdigits = 4))
+	end
+	println("")
+	println("")
+end
+
 function randWeights(m,n,nweights,Pinhibitory)
-	W = Matrix{Rational{Int}}(m,n)
+	W = Matrix{Rational{Int}}(undef,m,n)
 	for i = 1:m
-		if(rand() > Pinhibitory)
+		if(rand() < Pinhibitory)
 			S = -1
 		else
 			S = 1
@@ -36,7 +58,7 @@ function randWeights(m,n,nweights,Pinhibitory)
 end
 
 function Ggen(M::Model)
-	for C in ConnectionList
+	for C in M.ConnectionList
 		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
 	end
 end
@@ -45,10 +67,11 @@ function initModel(LayerSizes,nweights=1,Pinhib=0.05,Rₚ=1,TMR₀=2.00,Vb = 0.5
 	n = size(LayerSizes)[1]
 
 	# weights for the weight matrix of each layer
-	W = Matrix{Matrix}(n,n)
+	W = Matrix{Matrix}(undef,n,n)
 	
 	# Conductances for each forward layer
-	G₀ = Matrix{Matrix}(n,n)
+	G₀ = Matrix{Matrix}(undef,n,n)
+	Jₙ = Matrix{Matrix}(undef,n,n)
 	# Can this layer be modified?
 	Boolmask = Bool.(zeros(n,n))
 	
