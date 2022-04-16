@@ -23,7 +23,7 @@ struct Network
 end
 
 
-function VisualForwardProp(M::Model,stimulus::Function,dt::Float64,maxt::Float64,Q::Float64=0.8)
+function VisualForwardProp(M::Model,stimulus::Function,dt::Float64,maxt::Float64,Q::Float64=0.4)
 	net = Network(M,initNeurons(M.LayerSizes))
 	AllSpikes = Any[]
 	OutSpikes = BitArray[]
@@ -45,8 +45,8 @@ function VisualForwardProp(M::Model,stimulus::Function,dt::Float64,maxt::Float64
 		feed(net.Neurons[1],Q*input)
 		for C in net.M.ConnectionList
 			L₁ = C[2]; L₀ = C[1];
-			Spikesᵢ = all_spikes_t[C[1]]
-			feed(net.Neurons[L₁],Q*net.M.G₀[L₁,L₀]*Spikesᵢ)
+			layer_spikes = all_spikes_t[L₀]
+			feed(net.Neurons[L₁],Q*net.M.G₀[L₁,L₀]*layer_spikes)
 		end
 	end
 	# decode OutSpikes to data 

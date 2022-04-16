@@ -16,7 +16,7 @@ mutable struct Neuron
 end
 
 
-function initNeurons(LayerSizes::Vector{Int}, threshold::Float64 = 1.0, decay_pd::Float64 = 5*10^-8, refract_pd::Float64 = 1*10^-9, dt::Float64 = 5*10^-10)
+function initNeurons(LayerSizes::Vector{Int}, threshold::Float64 = 1.0, decay_pd::Float64 = 10^-7, refract_pd::Float64 = 1*10^-9, dt::Float64 = 5*10^-10)
 	n_layers = size(LayerSizes)[1]
 	neuron_layers = Vector{Vector{Neuron}}(undef,n_layers)
 	for i = 1:n_layers
@@ -49,11 +49,32 @@ end
 
 function updateNeuron(n::Neuron) # updates neuron, sends out spike if saturated
 	dt = n.dt
+	#=if(n.intlock == false)
+		if(n.integrated < n.threshold)
+			if(n.integrated >= 0)
+				n.intlock = false
+			else
+				n.integrated = max(n.integrated - dt/n.decay_pd,0)
+			end
+			return 0
+		else
+			n.intlock = true
+			return 1
+		end
+	else
+		n.integrated = max(n.integrated - dt/n.refract_pd,0)
+		if(n.integrated < 0)
+			intlock = false
+			n.integrated = 0
+		end
+		return 0
+	end=#
+	
 	if(n.integrated < n.threshold)
 		if(n.integrated >= 0)
 			n.intlock = false
 		else
-			n.integrated = max(n.integrated - dt/n.refract_pd,0)
+			n.integrated = max(n.integrated - dt/n.decay_pd,0)
 		end
 		return 0
 	else

@@ -70,7 +70,7 @@ function Ggen(M::Model)
 	end
 end
 
-function initModel(LayerSizes,nweights=1,Pinhib=0.15,Rₚ=1,TMR₀=5.00,Vb = 0.5)
+function initModel(LayerSizes,nweights=1,Pinhib=0.15,Rₚ=1,TMR₀=2.00,Vb = 0.5)
 	n = size(LayerSizes)[1]
 
 	# weights for the weight matrix of each layer
