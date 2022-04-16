@@ -102,8 +102,8 @@ end
 function test(M::Model, f::Function, f_expected::Function, dt::Float64, maxt::Float64, ΔV_L_vec::Vector{Float64}, ΔV_R_vec::Vector{Float64}, visual::Bool=false)
 	println("Running model (fix with name) for t = $maxt, dt = $dt")
 	println("Voltage vector left and right: ")
-	display(ΔV_L_vec)
-	display(ΔV_R_vec)
+	show(ΔV_L_vec)
+	show(ΔV_R_vec)
 	t = [t for t in 0:dt:maxt]
 	Ggen(M,ΔV_L_vec,ΔV_R_vec)
 	if(visual)
@@ -112,10 +112,10 @@ function test(M::Model, f::Function, f_expected::Function, dt::Float64, maxt::Fl
 		output = ForwardProp(M, f, dt, maxt)
 	end
 	expected = f_expected.(t)
+	#err = Error((output),expected)
+	#return output, expected, t, err
 	show(output)
-	show(expected)
-	err = Error(output,expected)
-	return output, expected, t, err
+	return output, t
 end
 
 

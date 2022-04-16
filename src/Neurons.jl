@@ -16,7 +16,7 @@ mutable struct Neuron
 end
 
 
-function initNeurons(LayerSizes::Vector{Int}, threshold::Float64 = 1.0, decay_pd::Float64 = 10^-8, refract_pd::Float64 = 3*10^-9, dt::Float64 = 10^-9)
+function initNeurons(LayerSizes::Vector{Int}, threshold::Float64 = 1.0, decay_pd::Float64 = 5*10^-8, refract_pd::Float64 = 1*10^-9, dt::Float64 = 5*10^-10)
 	n_layers = size(LayerSizes)[1]
 	neuron_layers = Vector{Vector{Neuron}}(undef,n_layers)
 	for i = 1:n_layers
@@ -38,12 +38,10 @@ function updateNeurons(neurons::Vector{Vector{Neuron}})
 		layer = neurons[i]
 		nᵢ = size(layer)[1]
 		layer_spikes = Vector{Bool}(undef,nᵢ)
-		#layer_spikes = updateNeuron.(layer)
-		for j in 1:nᵢ
-			layer_spikes[j] = updateNeuron(layer[j])
-		end
-		display(layer_spikes)
-		display(all_spikes)
+		layer_spikes = updateNeuron.(layer)
+		#for j in 1:nᵢ
+		#	layer_spikes[j] = updateNeuron(layer[j])
+		#end
 		all_spikes[i] = layer_spikes
 	end
 	return all_spikes

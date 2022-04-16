@@ -46,7 +46,7 @@ end
 function randWeights(m,n,nweights,Pinhibitory)
 	W = Matrix{Rational{Int}}(undef,m,n)
 	for i = 1:m
-		if(rand() < Pinhibitory)
+		if(rand() < 0)
 			S = -1
 		else
 			S = 1
@@ -60,17 +60,17 @@ end
 
 function Ggen(M::Model, ΔV_L::Vector{Float64}, ΔV_R::Vector{Float64})
 	for C in M.ConnectionList
-		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
+		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)^-1*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
 	end
 end
 
 function Ggen(M::Model)
 	for C in M.ConnectionList
-		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
+		M.G₀[C[2],C[1]] = M.Rₚ^-1*M.W[C[2],C[1]] + (M.TMR₀*M.Rₚ + M.Rₚ)^-1*(M.Jₙ[C[2],C[1]] .- M.W[C[2],C[1]])
 	end
 end
 
-function initModel(LayerSizes,nweights=1,Pinhib=0.05,Rₚ=1,TMR₀=2.00,Vb = 0.5)
+function initModel(LayerSizes,nweights=1,Pinhib=0.15,Rₚ=1,TMR₀=5.00,Vb = 0.5)
 	n = size(LayerSizes)[1]
 
 	# weights for the weight matrix of each layer
